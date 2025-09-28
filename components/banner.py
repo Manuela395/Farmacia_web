@@ -1,28 +1,51 @@
 import streamlit as st
+from pathlib import Path
+from PIL import Image
 
-banners = [
-    {"img": "https://placehold.co/1200x300?text=Analgésicos", "msg": "Migraña muy fuerte, migranol es la solución."},
-    {"img": "https://placehold.co/1200x300?text=Antibióticos", "msg": "Combate infecciones bacterianas con Amoxicilina."},
-    {"img": "https://placehold.co/1200x300?text=Antivirales", "msg": "Defiéndete de los virus con Aciclovir."},
-    {"img": "https://placehold.co/1200x300?text=Vitaminas", "msg": "Refuerza tu sistema inmune con Vitamina C."},
-    {"img": "https://placehold.co/1200x300?text=Cardiovasculares", "msg": "Cuida tu corazón con Atorvastatina."},
-]
+def _get_banner_paths(asset_folder: str):
+    """
+    Busca imágenes dentro de la carpeta de banners.
+    """
+    p = Path(asset_folder)
+    if not p.exists():
+        return []
+    return sorted([str(x) for x in p.iterdir() if x.suffix.lower() in [".jpg", ".jpeg", ".png"]])
 
-def show_banner():
+def show_banner(asset_folder="assets/banners"):
+    """
+    Muestra un carrusel de banners con botones de navegación.
+    """
+    st.markdown(
+        """
+        <style>
+        .banner-img { border-radius: 12px; margin-bottom: 10px; }
+        </style>
+        """,
+        unsafe_allow_html=True
+    )
+
+    paths = _get_banner_paths(asset_folder)
+    if not paths:
+        st.warning("⚠️ No hay imágenes en la carpeta de banners")
+        return
+
     if "banner_index" not in st.session_state:
         st.session_state.banner_index = 0
 
-    col1, col2, col3 = st.columns([1, 6, 1])
+    # Controles
+    cols = st.columns([1, 6, 1])
+    with cols[0]:
+        if st.button("◀", key="banner_prev"):
+            st.session_state.banner_index = (st.session_state.banner_index - 1) % len(paths)
+    with cols[2]:
+        if st.button("▶", key="banner_next"):
+            st.session_state.banner_index = (st.session_state.banner_index + 1) % len(paths)
 
-    with col1:
-        if st.button("⬅️"):
-            st.session_state.banner_index = (st.session_state.banner_index - 1) % len(banners)
-
-    with col2:
-        banner = banners[st.session_state.banner_index]
-        st.image(banner["img"], use_column_width=True)
-        st.markdown(f"<h4 style='text-align:center'>{banner['msg']}</h4>", unsafe_allow_html=True)
-
-    with col3:
-        if st.button("➡️"):
-            st.session_state.banner_index = (st.session_state.banner_index + 1) % len(banners)
+    # Mostrar imagen
+    idx = st.session_state.banner_index
+    img_path = paths[idx]
+    try:
+        img = Image.open(img_path)
+        st.image(img, use_column_width=True, caption=Path(img_path).stem, output_format="JPEG")
+    except Exception:
+        st.image(img_path, use_column_width=True)
