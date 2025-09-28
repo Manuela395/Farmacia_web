@@ -1,5 +1,4 @@
 # pages/router.py
-import pages.home as home
 import pages.medicines as medicines
 import pages.pharmacies as pharmacies
 import pages.carshop as carshop
