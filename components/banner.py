@@ -1,48 +1,28 @@
 import streamlit as st
 
-# Banners: horizontal images + call-to-action message.
-# Reemplaza las URLs por tus imágenes/banner si lo deseas.
-BANNERS = [
-    {
-        "img":"https://placehold.co/1200x300/0ea5e9/ffffff?text=Migraña:+Migranol+alivio+rápido",
-        "msg":"Migraña muy fuerte — Migranol es la solución. ¡Cómpralo ahora!"
-    },
-    {
-        "img":"https://placehold.co/1200x300/f97316/ffffff?text=Fiebre+y+Dolor:+Paracetamol",
-        "msg":"Fiebre y dolor: paracetamol para aliviarte rápido."
-    },
-    {
-        "img":"https://placehold.co/1200x300/16a34a/ffffff?text=Antibióticos:+Amoxicilina",
-        "msg":"Infecciones bacterianas: Amoxicilina confiable."
-    },
-    {
-        "img":"https://placehold.co/1200x300/7c3aed/ffffff?text=Vitaminas:+Energía+diaria",
-        "msg":"Vitaminas y suplementos: recarga tu energía con vitamina C."
-    },
-    {
-        "img":"https://placehold.co/1200x300/ef4444/ffffff?text=Pediátricos:+Cuidado+seguro",
-        "msg":"Pediátricos: fórmulas seguras para los más pequeños."
-    },
+banners = [
+    {"img": "https://placehold.co/1200x300?text=Analgésicos", "msg": "Migraña muy fuerte, migranol es la solución."},
+    {"img": "https://placehold.co/1200x300?text=Antibióticos", "msg": "Combate infecciones bacterianas con Amoxicilina."},
+    {"img": "https://placehold.co/1200x300?text=Antivirales", "msg": "Defiéndete de los virus con Aciclovir."},
+    {"img": "https://placehold.co/1200x300?text=Vitaminas", "msg": "Refuerza tu sistema inmune con Vitamina C."},
+    {"img": "https://placehold.co/1200x300?text=Cardiovasculares", "msg": "Cuida tu corazón con Atorvastatina."},
 ]
 
-def render_banner():
-    if "banner_idx" not in st.session_state:
-        st.session_state["banner_idx"] = 0
+def show_banner():
+    if "banner_index" not in st.session_state:
+        st.session_state.banner_index = 0
 
-    idx = st.session_state["banner_idx"] % len(BANNERS)
-    banner = BANNERS[idx]
+    col1, col2, col3 = st.columns([1, 6, 1])
 
-    left, middle, right = st.columns([1, 10, 1])
-    with left:
-        if st.button("◀", key="banner_prev"):
-            st.session_state["banner_idx"] = (st.session_state["banner_idx"] - 1) % len(BANNERS)
-            st.experimental_rerun()
-    with middle:
+    with col1:
+        if st.button("⬅️"):
+            st.session_state.banner_index = (st.session_state.banner_index - 1) % len(banners)
+
+    with col2:
+        banner = banners[st.session_state.banner_index]
         st.image(banner["img"], use_column_width=True)
-        st.markdown(f"<div style='text-align:center; font-weight:600'>{banner['msg']}</div>", unsafe_allow_html=True)
-    with right:
-        if st.button("▶", key="banner_next"):
-            st.session_state["banner_idx"] = (st.session_state["banner_idx"] + 1) % len(BANNERS)
-            st.experimental_rerun()
+        st.markdown(f"<h4 style='text-align:center'>{banner['msg']}</h4>", unsafe_allow_html=True)
 
-
+    with col3:
+        if st.button("➡️"):
+            st.session_state.banner_index = (st.session_state.banner_index + 1) % len(banners)

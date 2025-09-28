@@ -1,29 +1,8 @@
-# streamlit_app.py
 import streamlit as st
-from components.navbar import ALL_CATEGORIES
-from pages import router
+from components.navbar import navbar
 
-st.set_page_config(page_title="Web Pharmacy", layout="wide")
+st.set_page_config(layout="wide")
+navbar()
 
-# initialize session state keys safely
-defaults = {
-    "page": "home",
-    "cart": [],
-    "plp_page_idx": 0,
-    "selected_category": None,
-    "selected_pharmacy": "todas",
-    "banner_idx": 0,
-    "pdp_sku": None
-}
-for k,v in defaults.items():
-    if k not in st.session_state:
-        st.session_state[k] = v
-
-# left sidebar navigation quick links
-st.sidebar.title("Navegación")
-choice = st.sidebar.radio("Ir a:", ["home","medicines","pharmacies","carshop"], index=["home","medicines","pharmacies","carshop"].index(st.session_state.get("page","home")))
-st.session_state["page"] = choice
-
-# run page
-router.run_page(choice)
-
+st.markdown("### Bienvenido al sistema de farmacias con Streamlit 🚀")
+st.markdown("Usa el menú superior para navegar entre las páginas.")
