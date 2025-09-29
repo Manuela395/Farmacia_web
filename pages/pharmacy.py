@@ -8,7 +8,7 @@ def main():
     phs = get_pharmacies()
     if not phs:
         st.info("No se encontró endpoint /pharmacies en el backend. Asegúrate de exponerlo o crea farmacias manualmente.")
-    options = ["Todas"] + [f"{p.get('name')}|{p.get('_id', p.get('id', ''))}" for p in phs]
+    options = ["Todas"] + [f"{p.get('name')}" for p in phs]
     sel = st.selectbox("Seleccionar farmacia", options, key="pharm_view_select")
     if sel == "Todas":
         st.session_state.selected_pharmacy = "Todas"

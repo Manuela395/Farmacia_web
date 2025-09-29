@@ -24,18 +24,32 @@ CATEGORIES = [
 
 
 # -------- FARMACIAS --------
+
+    
 def get_pharmacies():
     try:
-        r = requests.get(f"{BASE_URL}/pharmacy/getAll", timeout=6)
+        r = requests.get(f"{BASE_URL}/pharmacies/getAll", timeout=6)
         r.raise_for_status()
-        return r.json()
+        data = r.json()
+
+        # Si el backend devuelve con envoltorio
+        if isinstance(data, dict) and "data" in data:
+            return data["data"]
+
+        # Si ya devuelve la lista directamente
+        if isinstance(data, list):
+            return data
+
+        return []
     except Exception as e:
         print("Error get_pharmacies:", e)
         return []
 
+
+
 def get_pharmacy_by_nit(nit):
     try:
-        r = requests.get(f"{BASE_URL}/pharmacy/get/{nit}", timeout=6)
+        r = requests.get(f"{BASE_URL}/pharmacies/get/{nit}", timeout=6)
         r.raise_for_status()
         return r.json()
     except Exception:
@@ -44,7 +58,7 @@ def get_pharmacy_by_nit(nit):
 # -------- MEDICINAS --------
 def get_medicines_by_category(category: str):
     try:
-        url = f"{BASE_URL}/medicine/getByCategory/{requests.utils.quote(category)}"
+        url = f"{BASE_URL}/medicines/getByCategory/{requests.utils.quote(category)}"
         r = requests.get(url, timeout=8)
         r.raise_for_status()
         return r.json()
@@ -52,8 +66,11 @@ def get_medicines_by_category(category: str):
         print("Error get_medicines_by_category:", e)
         return []
 
-def get_all_medicines(categories):
+def get_all_medicines(categories=None):
     """Loop por categorías si no existe endpoint global"""
+    if categories is None:
+        categories = CATEGORIES
+
     docs, seen = [], set()
     for cat in categories:
         for m in get_medicines_by_category(cat):
