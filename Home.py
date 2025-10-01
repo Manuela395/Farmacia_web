@@ -151,7 +151,30 @@ def main():
             else:
                 # Listar productos en el carrito
                 for key, item in cart.items():
-                    st.write(f"**{item['qty']}x** {item['name']}")
+                    img_col, desc_col, minus_col, plus_col = st.columns([1, 3, 1, 1])
+                    
+                    with img_col:
+                        st.image(item.get("image_url", "assets/medicines/default_plp.jpg"), width=50)
+
+                    with desc_col:
+                        st.write(f"**{item['qty']}x** {item['name']}")
+                    
+                    with minus_col:
+                        if st.button("−", key=f"minus_{key}", use_container_width=True):
+                            if cart[key]['qty'] > 1:
+                                cart[key]['qty'] -= 1
+                            else:
+                                # Si la cantidad es 1, eliminar el producto del carrito
+                                del cart[key]
+                            st.session_state.cart = cart
+                            st.rerun()
+
+                    with plus_col:
+                        if st.button("\+", key=f"plus_{key}", use_container_width=True):
+                            # Incrementar cantidad
+                            cart[key]['qty'] += 1
+                            st.session_state.cart = cart
+                            st.rerun()
             
             st.markdown("---")
             if st.button(f"Ir al Carrito ({len(cart)})", use_container_width=True):

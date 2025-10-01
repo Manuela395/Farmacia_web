@@ -46,7 +46,8 @@ def main():
                     "name": product.get("name"),
                     "qty": qty,
                     "price": product.get("price"),
-                    "pharmacy_id": product.get("pharmacy_id")
+                    "pharmacy_id": product.get("pharmacy_id"),
+                    "image_url": product.get("plp_image_url", "assets/medicines/default_plp.jpg")
                 }
             st.session_state.cart = cart
             st.success(f"{product.get('name')} agregado al carrito.")
