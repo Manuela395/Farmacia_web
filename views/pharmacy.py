@@ -6,9 +6,8 @@ def main():
     st.title("Farmacias")
     phs = get_pharmacies()
     if not phs:
-        st.info("No se encontró endpoint /pharmacies en el backend. Asegúrate de exponerlo o crea farmacias manualmente.")
+        st.info("No se encontró endpoint /pharmacies en el backend.")
 
-    # Opciones: usar nit como identificador
     options = {"Todas": "Todas"}
     for p in phs:
         options[p.get("name", "Sin nombre")] = p.get("nit")
@@ -16,7 +15,6 @@ def main():
     sel = st.selectbox("Seleccionar farmacia", list(options.keys()), key="pharm_view_select")
     st.session_state.selected_pharmacy = options[sel]
 
-    # listar productos de esa farmacia (filtrado local)
     allm = get_all_medicines()
     sel_ph = st.session_state.get("selected_pharmacy", "Todas")
     filtered = []
@@ -27,15 +25,11 @@ def main():
             continue
         filtered.append(m)
 
-    # mostrar grid simple
     for item in filtered[:30]:
-        st.image(item.get("plp_image_url", "assets/medicines/default_plp.jpg"),
-                 width=180, use_container_width=False)
+        st.image(item.get("plp_image_url", "assets/medicines/default_plp.jpg"), width=180)
         st.markdown(f"*{item.get('name')}* - {currency_fmt(item.get('price', 0), item.get('currency', 'COP'))}")
         st.write(item.get("category"))
         if st.button("Ver detalle", key=f"ph_view_{item.get('sku')}"):
-            st.session_state.view_sku = item.get("sku")
+            st.session_state.selected_sku = item.get("sku")
             st.experimental_rerun()
 
-if __name__ == "__main__":
-    main()

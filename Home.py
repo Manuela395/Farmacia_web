@@ -2,6 +2,7 @@ import streamlit as st
 from services.api import get_pharmacies, get_all_medicines, CATEGORIES
 from typing import List, Dict, Any
 from components.banner import show_banner
+from views import product_detail, carshop as cart_view # 👈 Corregido: importa carshop.py
 
 st.set_page_config(
     page_title="Farmacia Online",
@@ -37,16 +38,15 @@ def filter_medicines(medicines, category, pharmacy_id, query):
 
     return filtered
 
-def main():
-    # Estado inicial
-    if "selected_pharmacy" not in st.session_state:
-        st.session_state.selected_pharmacy = "Todas"
-    if "selected_category" not in st.session_state:
-        st.session_state.selected_category = "Todas"
-    if "page_num" not in st.session_state:
-        st.session_state.page_num = 1
-    if "cart" not in st.session_state:
-        st.session_state.cart = {}
+
+def show_listing():
+    # --- Botón del Carrito en Sidebar ---
+    cart_items_count = len(st.session_state.get("cart", {}))
+    cart_button_text = f"🛒 Ver Carrito ({cart_items_count})"
+    if st.sidebar.button(cart_button_text, use_container_width=True):
+        st.session_state.current_page = "cart"
+        st.rerun()
+    st.sidebar.divider()
 
     # Sidebar: farmacias
     st.sidebar.title("Farmacias")
@@ -69,7 +69,7 @@ def main():
         if cols[i].button(c, key=f"home_cat_{c}"):
             st.session_state.selected_category = c
             st.session_state.page_num = 1
-            st.rerun()   # ✅ reemplazo
+            st.rerun()
 
     # Buscador
     q = st.text_input("Buscar producto o marca", key="home_q")
@@ -77,7 +77,7 @@ def main():
         st.session_state.selected_category = "Todas"
         st.session_state.selected_pharmacy = "Todas"
         st.session_state.page_num = 1
-        st.rerun()   
+        st.rerun()
 
     # Listado de productos
     all_medicines = cached_get_all_medicines()
@@ -103,22 +103,45 @@ def main():
             st.image(item.get("plp_image_url", "assets/medicines/default_plp.jpg"),
                      width=200, use_container_width=False)
             st.markdown(f"**{item.get('name')}**")
-            st.write(f"{item.get('price',0):,} {item.get('currency','COP')}")
+            st.write(f"${item.get('price', 0):,.0f} {item.get('currency', 'COP')}")
             if st.button("Ver detalle", key=f"home_view_{item.get('sku')}"):
                 st.session_state.selected_sku = item.get("sku")
-                st.rerun()   # ✅ reemplazo
+                st.session_state.current_page = "detail"   # 👈 cambio de vista
+                st.rerun()
 
     # Navegación
     total_pages = (len(filtered) + per_page - 1) // per_page if filtered else 1
     c1, c2, c3 = st.columns([1, 1, 6])
-    if page > 1 and c1.button("<< Prev"):
+    if page > 1 and c1.button("<< Anterior"):
         st.session_state.page_num = page - 1
-        st.rerun()   # ✅ reemplazo
+        st.rerun()
     c2.write(f"Página {page} / {total_pages}")
-    if page < total_pages and c3.button("Next >>"):
+    if page < total_pages and c3.button("Siguiente >>"):
         st.session_state.page_num = page + 1
-        st.rerun()   
+        st.rerun()
+
+
+def main():
+    # Estado inicial
+    if "selected_pharmacy" not in st.session_state:
+        st.session_state.selected_pharmacy = "Todas"
+    if "selected_category" not in st.session_state:
+        st.session_state.selected_category = "Todas"
+    if "page_num" not in st.session_state:
+        st.session_state.page_num = 1
+    if "cart" not in st.session_state:
+        st.session_state.cart = {}
+    if "current_page" not in st.session_state:
+        st.session_state.current_page = "list"   # 👈 inicializa vista
+
+    # Router
+    if st.session_state.current_page == "list":
+        show_listing()
+    elif st.session_state.current_page == "detail":
+        product_detail.main()
+    elif st.session_state.current_page == "cart":
+        cart_view.main()
+
 
 if __name__ == "__main__":
     main()
-

@@ -1,4 +1,3 @@
-# views/product_detail.py
 import streamlit as st
 from services.api import get_all_medicines
 from utils.helpers import currency_fmt
@@ -19,10 +18,12 @@ def main():
             st.experimental_rerun()
         return
 
-    # Layout
     col1, col2 = st.columns([1, 2])
     with col1:
-        st.image(product.get("pdp_image_url") or product.get("plp_image_url") or "assets/medicines/default_plp.jpg", width=360)
+        st.image(
+            product.get("pdp_image_url") or product.get("plp_image_url") or "assets/medicines/default_plp.jpg",
+            width=360
+        )
     with col2:
         st.header(product.get("name"))
         st.write(f"**Marca:** {product.get('brand','N/A')}")
@@ -30,24 +31,26 @@ def main():
         st.write(f"**Farmacia:** {product.get('pharmacy_name', product.get('pharmacy','Desconocida'))}")
         st.write(f"**Precio:** {currency_fmt(product.get('price',0), product.get('currency','COP'))}")
         st.write(f"**Stock disponible:** {product.get('stock',0)}")
+
         qty = st.number_input("Cantidad", min_value=1, max_value=product.get("stock", 1), value=1, key=f"pd_qty_{sku}")
 
         if st.button("🛒 Agregar al carrito"):
-            car = st.session_state.get("car", {})  
+            cart = st.session_state.get("cart", {})   # 👈 Corregido: usar "cart"
             key = (product.get("pharmacy_id", "default"), product.get("sku"))
-            if key in car:
-                car[key]["qty"] += qty
+            if key in cart:
+                cart[key]["qty"] += qty
             else:
-                car[key] = {
+                cart[key] = {
                     "sku": product.get("sku"),
                     "name": product.get("name"),
                     "qty": qty,
                     "price": product.get("price"),
                     "pharmacy_id": product.get("pharmacy_id")
                 }
-            st.session_state.car = car
+            st.session_state.cart = cart # 👈 Corregido: usar "cart"
             st.success(f"{product.get('name')} agregado al carrito.")
 
-    if st.button("⬅ Volver al listado"):
-        st.session_state.selected_sku = None
-        st.experimental_rerun()
+    if st.button("Volver al listado"):
+        st.session_state.current_page = "list"
+        # st.experimental_rerun()  <-- Esta es la línea que causa el error
+        st.rerun()  

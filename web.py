@@ -1,4 +1,4 @@
-import streamlit as st
+import streamlit as st 
 
 try:
     from views.pharmacy import main as pharmacy_page
@@ -30,7 +30,7 @@ st.set_page_config(page_title="Farmacia Online", layout="wide", initial_sidebar_
 # Estado base
 if "page" not in st.session_state:
     st.session_state.page = "Home"
-if "car" not in st.session_state:
+if "car" not in st.session_state:   # ✅ usar "car"
     st.session_state.car = {}
 if "selected_sku" not in st.session_state:
     st.session_state.selected_sku = None
@@ -43,7 +43,7 @@ st.session_state.page = menu
 # Sidebar - resumen carrito
 st.sidebar.markdown("---")
 st.sidebar.header("🛒 Carrito")
-car = st.session_state.get("car", {})
+car = st.session_state.get("car", {})   # ✅ usar "car"
 if car:
     total = 0
     for key, item in car.items():
@@ -63,7 +63,6 @@ if st.session_state.get("selected_sku"):
     else:
         st.error("La vista de detalle no está disponible (views/product_detail.py faltante).")
         st.write("Error de import:", PD_IMPORT_ERR)
-        # permitir volver al listado
         if st.button("Volver al listado"):
             st.session_state.selected_sku = None
             st.experimental_rerun()
