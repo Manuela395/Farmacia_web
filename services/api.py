@@ -5,27 +5,25 @@ BASE_URL = os.environ.get("BACKEND_URL", "http://localhost:5000")
 
 # Lista de categorías
 CATEGORIES = [
-    "Analgésicos y antipiréticos",
     "Antiinflamatorios",
-    "Antibióticos",
+    "Anticonceptivos y hormonales",
+    "Gastrointestinales",
     "Antivirales",
+    "Vitaminas y suplementos",
+    "Antibióticos",
+    "Analgésicos y antipiréticos",
     "Antifúngicos",
     "Antihipertensivos",
     "Antidiabéticos",
     "Cardiovasculares",
     "Antidepresivos y ansiolíticos",
     "Antihistamínicos y antialérgicos",
-    "Gastrointestinales",
-    "Vitaminas y suplementos",
-    "Anticonceptivos y hormonales",
     "Oftálmicos y óticos",
     "Pediátricos"
 ]
 
 
-# -------- FARMACIAS --------
-
-    
+# -------- FARMACIAS --------   
 def get_pharmacies():
     try:
         r = requests.get(f"{BASE_URL}/pharmacies/getAll", timeout=6)
@@ -66,19 +64,31 @@ def get_medicines_by_category(category: str):
         print("Error get_medicines_by_category:", e)
         return []
 
-def get_all_medicines(categories=None):
-    """Loop por categorías si no existe endpoint global"""
-    if categories is None:
-        categories = CATEGORIES
+# -------- MEDICINAS / PRODUCTOS --------
+def get_all_medicines():
+    """
+    Obtiene todos los productos desde el backend unificados con stock y farmacia.
+    Endpoint: /products/getAll
+    """
+    try:
+        url = f"{BASE_URL}/products/getAll"
+        r = requests.get(url, timeout=8)
+        r.raise_for_status()
+        data = r.json()
 
-    docs, seen = [], set()
-    for cat in categories:
-        for m in get_medicines_by_category(cat):
-            sku = m.get("sku")
-            if sku and sku not in seen:
-                docs.append(m)
-                seen.add(sku)
-    return docs
+        # Si backend devuelve directamente lista
+        if isinstance(data, list):
+            return data
+
+        # Si backend devuelve con envoltorio tipo {"data": [...]}
+        if isinstance(data, dict) and "data" in data:
+            return data["data"]
+
+        return []
+    except Exception as e:
+        print("Error get_all_medicines:", e)
+        return []
+
 
 # -------- STOCK --------
 def get_stock_by_pharmacy(pharmacy_id: str):

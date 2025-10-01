@@ -1,4 +1,3 @@
-# frontend/pages/medicines.py
 import streamlit as st
 from services.api import get_all_medicines, get_medicines_by_category, CATEGORIES
 from utils.helpers import currency_fmt
@@ -50,7 +49,7 @@ def main():
         for col, item in zip(cols, row):
             with col:
                 st.image(item.get("plp_image_url", "assets/medicines/default_plp.jpg"), width=220)
-                st.markdown(f"**{item.get('name')}**")
+                st.markdown(f"*{item.get('name')}*")
                 st.write(currency_fmt(item.get("price",0), item.get("currency","COP")))
                 qty = st.number_input("Cantidad", min_value=1, max_value=item.get("stock",1), value=1, key=f"qty_{item.get('sku')}")
                 if st.button("Agregar al carrito", key=f"add_{item.get('sku')}"):
@@ -86,7 +85,7 @@ def main():
         cart = st.session_state.get("cart", {})
         remove_keys = []
         for k, it in cart.items():
-            st.write(f"**{it['name']}**")
+            st.write(f"*{it['name']}*")
             qty = st.number_input(f"qty_{k}", min_value=0, value=it["qty"])
             if qty == 0:
                 remove_keys.append(k)
@@ -116,5 +115,5 @@ def main():
             else:
                 st.error(f"Error en pago: {res.get('error')}")
 
-if __name__ == "__main__":
+if __name__ == "_main_":
     main()

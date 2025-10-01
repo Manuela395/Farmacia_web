@@ -1,4 +1,3 @@
-# frontend/utils/helpers.py
 import math
 
 PAGE_SIZE = 6  # Número de productos por página

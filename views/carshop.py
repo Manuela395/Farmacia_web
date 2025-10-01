@@ -1,4 +1,3 @@
-# frontend/pages/carshop.py
 import streamlit as st
 from services.api import post_checkout
 from utils.helpers import currency_fmt
@@ -12,7 +11,7 @@ def main():
     total = 0
     to_remove = []
     for k, it in cart.items():
-        st.write(f"**{it['name']}** (SKU: {it['sku']})")
+        st.write(f"*{it['name']}* (SKU: {it['sku']})")
         qty = st.number_input(f"Cantidad_{k}", min_value=0, value=it["qty"])
         if qty == 0:
             to_remove.append(k)
@@ -39,5 +38,5 @@ def main():
         else:
             st.error(f"Error al pagar: {res.get('error')}")
 
-if __name__ == "__main__":
+if __name__ == "_main_":
     main()
