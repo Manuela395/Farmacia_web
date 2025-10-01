@@ -2,7 +2,7 @@ import streamlit as st
 from services.api import get_pharmacies, get_all_medicines, CATEGORIES
 from typing import List, Dict, Any
 from components.banner import show_banner
-from views import product_detail, carshop as cart_view # 👈 Corregido: importa carshop.py
+from views import product_detail, carshop as cart_view 
 
 st.set_page_config(
     page_title="Farmacia Online",
@@ -40,23 +40,6 @@ def filter_medicines(medicines, category, pharmacy_id, query):
 
 
 def show_listing():
-    # --- Botón del Carrito en Sidebar ---
-    cart_items_count = len(st.session_state.get("cart", {}))
-    cart_button_text = f"🛒 Ver Carrito ({cart_items_count})"
-    if st.sidebar.button(cart_button_text, use_container_width=True):
-        st.session_state.current_page = "cart"
-        st.rerun()
-    st.sidebar.divider()
-
-    # Sidebar: farmacias
-    st.sidebar.title("Farmacias")
-    phs = cached_get_pharmacies()
-    options = {"Todas": "Todas"}
-    for ph in phs:
-        options[ph.get("name", "Desconocida")] = ph.get("id") or ph.get("nit")
-
-    sel = st.sidebar.radio("Seleccionar farmacia", list(options.keys()), index=0, key="home_ph_select")
-    st.session_state.selected_pharmacy = options[sel]
 
     # Banner superior
     show_banner(asset_folder="assets/banners")
@@ -120,7 +103,6 @@ def show_listing():
         st.session_state.page_num = page + 1
         st.rerun()
 
-
 def main():
     # Estado inicial
     if "selected_pharmacy" not in st.session_state:
@@ -131,17 +113,67 @@ def main():
         st.session_state.page_num = 1
     if "cart" not in st.session_state:
         st.session_state.cart = {}
+    if "right_sidebar_expanded" not in st.session_state:
+        st.session_state.right_sidebar_expanded = False
     if "current_page" not in st.session_state:
         st.session_state.current_page = "list"   # 👈 inicializa vista
 
-    # Router
-    if st.session_state.current_page == "list":
-        show_listing()
-    elif st.session_state.current_page == "detail":
-        product_detail.main()
-    elif st.session_state.current_page == "cart":
-        cart_view.main()
+    # --- Sidebar Izquierda (Filtros) ---
+    st.sidebar.title("Farmacias")
+    phs = cached_get_pharmacies()
+    options = {"Todas": "Todas"} 
+    for ph in phs:
+        options[ph.get("name", "Desconocida")] = ph.get("id") or ph.get("nit")
+    sel = st.sidebar.radio("Seleccionar farmacia", list(options.keys()), index=0, key="home_ph_select")
+    st.session_state.selected_pharmacy = options[sel]
+
+    # --- Lógica para la barra lateral derecha expandible ---
+    if st.session_state.right_sidebar_expanded:
+        # Estado expandido: El contenido principal ocupa 3 partes, la barra lateral 1
+        main_col, right_sidebar = st.columns([3, 1])
+    else:
+        # Estado colapsado: El contenido principal ocupa casi todo, la barra es muy delgada
+        main_col, right_sidebar = st.columns([15, 1])
+
+    with right_sidebar:
+        if st.session_state.right_sidebar_expanded:
+            # Contenido de la barra expandida
+            if st.button("➡️", use_container_width=True, help="Cerrar panel de carrito"):
+                st.session_state.right_sidebar_expanded = False
+                st.rerun()
+            
+            st.subheader("Mi Carrito")
+            st.markdown("---")
+
+            cart = st.session_state.get("cart", {})
+            if not cart:
+                st.info("Tu carrito está vacío.")
+            else:
+                # Listar productos en el carrito
+                for key, item in cart.items():
+                    st.write(f"**{item['qty']}x** {item['name']}")
+            
+            st.markdown("---")
+            if st.button(f"Ir al Carrito ({len(cart)})", use_container_width=True):
+                st.session_state.current_page = "cart"
+                st.rerun()
+        else:
+            # Botón para expandir la barra
+            if st.button("⬅️", use_container_width=True, help="Abrir panel del carrito"):
+                st.session_state.right_sidebar_expanded = True
+                st.rerun()
+
+    with main_col:
+        # Router de vistas
+        if st.session_state.current_page == "list":
+            show_listing()
+        elif st.session_state.current_page == "detail":
+            product_detail.main()
+        elif st.session_state.current_page == "cart":
+            cart_view.main()
 
 
 if __name__ == "__main__":
+    # El punto de entrada ahora es la función main()
+    # que se encarga de inicializar el estado y renderizar todo.
     main()

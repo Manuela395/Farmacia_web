@@ -30,7 +30,7 @@ st.set_page_config(page_title="Farmacia Online", layout="wide", initial_sidebar_
 # Estado base
 if "page" not in st.session_state:
     st.session_state.page = "Home"
-if "car" not in st.session_state:   # ✅ usar "car"
+if "car" not in st.session_state:   
     st.session_state.car = {}
 if "selected_sku" not in st.session_state:
     st.session_state.selected_sku = None
@@ -43,7 +43,7 @@ st.session_state.page = menu
 # Sidebar - resumen carrito
 st.sidebar.markdown("---")
 st.sidebar.header("🛒 Carrito")
-car = st.session_state.get("car", {})   # ✅ usar "car"
+car = st.session_state.get("car", {}) 
 if car:
     total = 0
     for key, item in car.items():

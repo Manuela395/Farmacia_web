@@ -15,7 +15,8 @@ def main():
         st.error("Producto no encontrado.")
         if st.button("Volver al listado"):
             st.session_state.selected_sku = None
-            st.experimental_rerun()
+            st.session_state.current_page = "list"
+            st.rerun()
         return
 
     col1, col2 = st.columns([1, 2])
@@ -35,7 +36,7 @@ def main():
         qty = st.number_input("Cantidad", min_value=1, max_value=product.get("stock", 1), value=1, key=f"pd_qty_{sku}")
 
         if st.button("🛒 Agregar al carrito"):
-            cart = st.session_state.get("cart", {})   # 👈 Corregido: usar "cart"
+            cart = st.session_state.get("cart", {})
             key = (product.get("pharmacy_id", "default"), product.get("sku"))
             if key in cart:
                 cart[key]["qty"] += qty
@@ -47,10 +48,9 @@ def main():
                     "price": product.get("price"),
                     "pharmacy_id": product.get("pharmacy_id")
                 }
-            st.session_state.cart = cart # 👈 Corregido: usar "cart"
+            st.session_state.cart = cart
             st.success(f"{product.get('name')} agregado al carrito.")
 
-    if st.button("Volver al listado"):
+    if st.button("⬅️ Volver al listado"):
         st.session_state.current_page = "list"
-        # st.experimental_rerun()  <-- Esta es la línea que causa el error
-        st.rerun()  
+        st.rerun()
